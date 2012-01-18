@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Test Trainer</title>
+        <script src="lib/coffee-script.js"></script>
+        <script src="lib/underscore-min.js"></script>
+        <script src="lib/jquery-1.7.1.min.js"></script>
+        <script src="tester.coffee" type="text/coffeescript"></script>
+        <script type="text/coffeescript">
+
+          tester = null
+
+          startTester = ->
+            tester = window.DokuWikiTester $('#source').val(), (stats) ->
+              $('#stats').html ("#{key}: #{val}" for key, val of stats).join '\n'
+            next()
+
+          next = ->
+            {question, answers} = tester.next()
+            $('#question').text question
+            $('#answers').html('').append ($('<li>', text: answer) for [choice, answer] in answers)...
+            $('#answer').val ''
+
+          $ ->
+            $('#answer').keydown ({keyCode}) ->
+              if keyCode is 13 #Enter
+                [ok, correctAnswer] = tester.answer $(this).val().split /[,\. ]+/
+                if not ok then alert "Wrong. Correct answer: #{correctAnswer}"
+                next()
+
+            $('#source').change startTester
+
+            if $.trim($('#source').val()) isnt ''
+              startTester()
+
+        </script>
+
+        <style>
+          body, pre {font-family: "Segoe UI", sans-serif;}
+          .source {opacity:.5;}
+          #source {width: 400px; height:100px;}
+          #answer {width: 200px;}
+        </style>
+    </head>
+
+    <body>
+        <div class="source">
+        Source
+        <br/>
+        <textarea id="source" placeholder="Put Dokuwiki-formatted questions here (and click outside)">
+
+1. Example question
+    * incorrect answer
+    * **correct answer **
+    * **also a correct answer**
+
+2. 1 + 1
+    * 0
+    * 1
+    * **2**
+    * Infinity
+
+3. Hello
+    * dolly
+    * kitty
+    * **world**
+
+        </textarea></div>
+
+        <pre id="stats"></pre>
+
+        <p id="question"></p>
+
+        <ol id="answers"></ol>
+
+        <input id="answer" placeholder="Type answer and hit enter." />
+    </body>
+</html>
